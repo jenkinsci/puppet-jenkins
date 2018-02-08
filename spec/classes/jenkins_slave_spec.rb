@@ -133,25 +133,47 @@ describe 'jenkins::slave' do
       end
     end
 
-    describe 'with valid tunnel specified' do
-      let(:params) do
-        {
-          tunnel: 'localhost:9000'
-        }
+    describe 'with tunnel specified' do
+      context 'with invalid tunnel specified' do
+        let(:params) do
+          {
+            tunnel: ':',
+          }
+        end
+        it { should raise_error(Puppet::Error,/Error while evaluating a Resource Statement/) }
       end
 
-      it {should contain_file(slave_runtime_file).with_content(/^TUNNEL="localhost:9000"$/)}
+      context 'as a valid tunnel' do
+        context 'with HOST:PORT specified' do
+          let(:params) do
+            {
+              tunnel: 'localhost:9000',
+            }
+          end
 
-    end
+          it {should contain_file(slave_runtime_file).with_content(/^TUNNEL="localhost:9000"$/)}
+        end
 
-    describe 'with invalid tunnel specified' do
-      let(:params) do
-        {
-          tunnel: ':'
-        }
+        context 'with HOST: specified' do
+          let(:params) do
+            {
+              tunnel: 'localhost:',
+            }
+          end
+
+          it {should contain_file(slave_runtime_file).with_content(/^TUNNEL="localhost:"$/)}
+        end
+
+        context 'with :PORT specified' do
+          let(:params) do
+            {
+              tunnel: ':9000',
+            }
+          end
+
+          it {should contain_file(slave_runtime_file).with_content(/^TUNNEL=":9000"$/)}
+        end
       end
-      it { should raise_error(Puppet::Error) }
-
     end
 
     describe 'with different swarm versions' do
