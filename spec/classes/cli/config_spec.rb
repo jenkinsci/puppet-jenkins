@@ -122,26 +122,6 @@ describe 'jenkins::cli::config' do
           end # when ssh_private_key is also set
         end # ssh_private_key_content
       end # parameters
-
-      describe 'package gem provider' do
-        context 'is_pe fact' do
-          context 'true' do
-            let :facts do
-              super().merge(is_pe: true)
-            end
-
-            it { is_expected.to contain_package('retries').with(provider: 'pe_gem') }
-          end
-
-          context 'false' do
-            let :facts do
-              super().merge(is_pe: false)
-            end
-
-            it { is_expected.to contain_package('retries').with(provider: 'gem') }
-          end
-        end # 'is_pe fact' do
-      end # 'package gem provider' do
     end
   end
 end

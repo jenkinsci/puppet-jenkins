@@ -19,28 +19,9 @@ class jenkins::cli::config(
   Boolean $cli_password_file_exists               = false,
   Optional[String] $ssh_private_key_content       = undef,
 ) {
-
-  if str2bool($facts['is_pe']) {
-    $gem_provider = 'pe_gem'
-    # lint:ignore:legacy_facts
-  } elsif $facts['rubysitedir'] and ('/opt/puppetlabs/puppet/lib/ruby' in $facts['rubysitedir']) {
-    # lint:endignore
-    # AIO puppet
-    $gem_provider = 'puppet_gem'
-  } else {
-    $gem_provider = 'gem'
-  }
-
   # lint:ignore:legacy_facts
   $is_root = $facts['id'] == 'root'
   # lint:endignore
-
-  # required by PuppetX::Jenkins::Provider::Clihelper base
-  if ! defined(Package['retries']) {
-    package { 'retries':
-      provider => $gem_provider,
-    }
-  }
 
   if $ssh_private_key and $ssh_private_key_content {
     file { $ssh_private_key:

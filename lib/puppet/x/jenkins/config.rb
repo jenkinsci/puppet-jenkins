@@ -16,7 +16,6 @@ class Puppet::X::Jenkins::Config
     ssh_private_key: nil,
     puppet_helper: '/usr/lib/jenkins/puppet_helper.groovy',
     cli_tries: 30,
-    cli_try_sleep: 2,
     cli_username: nil,
     cli_password: nil,
     cli_password_file: '/tmp/jenkins_credentials_for_puppet',

@@ -8,8 +8,7 @@ describe Puppet::X::Jenkins::Config do
     url: 'http://localhost:8080',
     ssh_private_key: nil,
     puppet_helper: '/usr/lib/jenkins/puppet_helper.groovy',
-    cli_tries: 30,
-    cli_try_sleep: 2
+    cli_tries: 30
   }.freeze
 
   shared_context 'facts' do
@@ -19,7 +18,6 @@ describe Puppet::X::Jenkins::Config do
       Facter.add(:jenkins_ssh_private_key) { setcode { 'fact.id_rsa' } }
       Facter.add(:jenkins_puppet_helper) { setcode { 'fact.groovy' } }
       Facter.add(:jenkins_cli_tries) { setcode { 22 } }
-      Facter.add(:jenkins_cli_try_sleep) { setcode { 33 } }
     end
   end
 
@@ -124,8 +122,7 @@ describe Puppet::X::Jenkins::Config do
               url: 'http://localhost:111',
               ssh_private_key: 'cat.id_rsa',
               puppet_helper: 'cat.groovy',
-              cli_tries: 222,
-              cli_try_sleep: 333
+              cli_tries: 222
             )
 
             catalog.add_resource jenkins
