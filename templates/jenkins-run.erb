@@ -24,6 +24,35 @@
 #     USA.
 #
 
+# This is required to safely introduce all the java options that may be given
+# to this script via the Environment, and allow them to be seen into java applications
+# properly
+add_jenkins_java_options() {
+  # Save the IFS in order to not break the rest of the script
+  SAVEIFS=$IFS
+
+  # Introduce a safe character to use as split character
+  IFS="|"
+
+  # Add an initial space in order to avoid checking later which options starts with - or not
+  JENKINS_JAVA_OPTIONS=" $JENKINS_JAVA_OPTIONS"
+
+  # Split the string by " -" and create an array out of items obtained
+  opts=${JENKINS_JAVA_OPTIONS//\ \-/\|}
+  opts=${opts#"|"}
+  opts_arr=($opts)
+
+  # Restore IFS, we're done here
+  IFS=$SAVEIFS
+
+  # Attach each obtained item into the PARAMS array in order to pass them correctly
+  for (( i=0; i<${#opts_arr[@]}; i++ ))
+  do
+    _arg=$(echo "-${opts_arr[$i]}" | xargs)
+    PARAMS+=("$_arg")
+  done
+}
+
 # Check for missing binaries (stale symlinks should not happen)
 # XXX JENKINS_WAR is currently in the Debian sysconf but not on RedHat
 # fix this upstream
@@ -50,9 +79,11 @@ do
   JENKINS_JAVA_CMD="$candidate"
 done
 
-JAVA_CMD="$JENKINS_JAVA_CMD $JENKINS_JAVA_OPTIONS -DJENKINS_HOME=$JENKINS_HOME -jar $JENKINS_WAR"
-
-PARAMS=()
+PARAMS=("$JENKINS_JAVA_CMD")
+add_jenkins_java_options
+PARAMS+=("-DJENKINS_HOME=$JENKINS_HOME")
+PARAMS+=("-jar")
+PARAMS+=("$JENKINS_WAR")
 PARAMS+=("--logfile=/var/log/jenkins/jenkins.log")
 PARAMS+=("--webroot=/var/cache/jenkins/war")
 PARAMS+=("--daemon")
@@ -75,4 +106,4 @@ if [ "$JENKINS_ENABLE_ACCESS_LOG" = "yes" ]; then
   PARAMS+=("--simpleAccessLogger.file=/var/log/jenkins/access_log")
 fi
 
-$JAVA_CMD "${PARAMS[@]}"
+exec "${PARAMS[@]}"
