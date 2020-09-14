@@ -7,6 +7,7 @@ class jenkins::params {
   $direct_download       = undef
   $service_enable        = true
   $service_ensure        = 'running'
+  $service_restart       = true
   $install_java          = true
   $swarm_version         = '2.2'
   $default_plugins_host  = 'https://updates.jenkins.io'

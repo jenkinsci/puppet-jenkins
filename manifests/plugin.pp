@@ -59,7 +59,7 @@ define jenkins::plugin (
 ) {
   include jenkins
 
-  if $jenkins::manage_service {
+  if $jenkins::manage_service and $jenkins::service_restart {
     $notify = Class['jenkins::service']
   } else {
     $notify = undef
