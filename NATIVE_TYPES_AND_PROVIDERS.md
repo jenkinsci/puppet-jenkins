@@ -121,8 +121,6 @@ class { '::jenkins':
 include ::jenkins::cli_helper
 ```
 
-The ruby gem `retries` is presently required by all providers.
-
 ### `puppetserver`
 
 There is a known issue with `puppetserver` being unable to load code from
@@ -140,13 +138,6 @@ jruby-puppet: {
 ```
 
 See [SERVER-973](https://tickets.puppetlabs.com/browse/SERVER-973)
-
-Additionally, the `retries` gem is required.  This may be installed on the master by running:
-
-```
-/opt/puppetlabs/bin/puppetserver gem install retries
-```
-
 
 Types
 --

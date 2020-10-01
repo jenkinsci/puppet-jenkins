@@ -12,7 +12,7 @@ class jenkins::params {
   $default_plugins_host  = 'https://updates.jenkins.io'
   $port                  = 8080
   $prefix                = ''
-  $cli_tries             = 10
+  $cli_tries             = 9
   $cli_try_sleep         = 10
   $package_cache_dir     = '/var/cache/jenkins_pkgs'
   $package_name          = 'jenkins'

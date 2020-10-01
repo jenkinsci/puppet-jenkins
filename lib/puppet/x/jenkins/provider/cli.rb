@@ -1,4 +1,5 @@
 require 'puppet/provider'
+require 'puppet/util/retry_action'
 require 'facter'
 
 require 'json'
@@ -27,7 +28,6 @@ class Puppet::X::Jenkins::Provider::Cli < Puppet::Provider
   initvars
 
   commands java: 'java'
-  confine feature: :retries
 
   # subclasses should inherit this value once it has been determined that
   # jenkins requires authorization, it shortens the run time be elemating the
@@ -166,7 +166,6 @@ class Puppet::X::Jenkins::Provider::Cli < Puppet::Provider
     url                      = config[:url]
     ssh_private_key          = config[:ssh_private_key]
     cli_tries                = config[:cli_tries]
-    cli_try_sleep            = config[:cli_try_sleep]
     cli_username             = config[:cli_username]
     cli_password             = config[:cli_password]
     cli_password_file        = config[:cli_password_file]
@@ -199,16 +198,7 @@ class Puppet::X::Jenkins::Provider::Cli < Puppet::Provider
     # retry on "unknown" execution errors but don't catch AuthErrors.  If an
     # AuthError has bubbled up to this level it means either an ssh_private_key
     # is required and we don't have one or that one we have was rejected.
-    handler = proc do |exception, attempt_number, total_delay|
-      Puppet.debug("#{sname} caught #{exception.class.to_s.match(%r{::([^:]+)$})[1]}; retry attempt #{attempt_number}; #{total_delay.round(3)} seconds have passed")
-    end
-    with_retries(
-      max_tries: cli_tries,
-      base_sleep_seconds: 1,
-      max_sleep_seconds: cli_try_sleep,
-      rescue: [UnknownError, NetError],
-      handler: handler
-    ) do
+    Puppet::Util::RetryAction.retry_action(retries: cli_tries, retry_exceptions: [UnknownError, NetError]) do
       result = execute_with_auth(cli_cmd, auth_cmd, options)
       Puppet.debug("#{sname} command stdout:\n#{result}") unless result == ''
       return result
@@ -259,7 +249,8 @@ class Puppet::X::Jenkins::Provider::Cli < Puppet::Provider
       'SEVERE: I/O error in channel CLI connection',
       'java.net.SocketException: Connection reset',
       'java.net.ConnectException: Connection refused',
-      'java.io.IOException: Failed to connect'
+      'java.io.IOException: Failed to connect',
+      'java.io.IOException: Server returned HTTP response code: 503'
     ]
 
     if options.key?(:tmpfile_as_param)
