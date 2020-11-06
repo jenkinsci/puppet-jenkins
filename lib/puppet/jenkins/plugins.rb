@@ -54,7 +54,7 @@ module Puppet
 
           manifest = File.join(plugin_dir, 'META-INF', 'MANIFEST.MF')
           begin
-            manifest = manifest_data(File.read(manifest))
+            manifest = manifest_data(File.read(manifest, encoding: 'UTF-8'))
             plugins[plugin] = manifest if manifest
           rescue StandardError
             # Nothing really to do about it, failing means no version which will
@@ -83,7 +83,7 @@ module Puppet
       #
       # @return [Hash] Parsed version of the update center JSON
       def self.plugins_from_updatecenter(filename)
-        buffer = File.read(filename)
+        buffer = File.read(filename, encoding: 'UTF-8')
         return {} if buffer.nil? || buffer.empty?
 
         # Trim off the first and last lines, which are the JSONP gunk
