@@ -1,5 +1,4 @@
 require_relative '../jenkins'
-require 'json'
 
 module Puppet
   module Jenkins
@@ -54,9 +53,10 @@ module Puppet
 
           manifest = File.join(plugin_dir, 'META-INF', 'MANIFEST.MF')
           begin
-            manifest = manifest_data(File.read(manifest))
+            manifest = manifest_data(File.read(manifest, encoding: 'UTF-8'))
             plugins[plugin] = manifest if manifest
-          rescue StandardError
+          rescue StandardError => e
+            Puppet.warning("Failed to read Jenkins plugin manifest #{manifest}: #{e}")
             # Nothing really to do about it, failing means no version which will
             # result in a new plugin if needed
             nil
@@ -69,26 +69,7 @@ module Puppet
       #
       # @return [Boolean] T
       def self.exists?
-        home = Puppet::Jenkins.home_dir
-        return false if home.nil?
-        return false unless File.directory? Puppet::Jenkins.plugins_dir
-        true
-      end
-
-      # Parse the update-center.json file which Jenkins uses to maintain it's
-      # internal dependency graph for plugins
-      #
-      # This document is technically JSONP formatted so we must munge the file
-      # a bit to load the JSON bits properly
-      #
-      # @return [Hash] Parsed version of the update center JSON
-      def self.plugins_from_updatecenter(filename)
-        buffer = File.read(filename)
-        return {} if buffer.nil? || buffer.empty?
-
-        # Trim off the first and last lines, which are the JSONP gunk
-        data = JSON.parse(buffer.split("\n")[1...-1].join("\n"))
-        data['plugins'] || {}
+        !Puppet::Jenkins.home_dir.nil? && File.directory?(Puppet::Jenkins.plugins_dir)
       end
     end
   end

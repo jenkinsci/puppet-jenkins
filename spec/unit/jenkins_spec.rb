@@ -7,17 +7,18 @@ describe Puppet::Jenkins do
 
     context "when a jenkins user doesn't exist" do
       before do
-        File.should_receive(:expand_path).and_raise(ArgumentError)
+        Etc.should_receive(:getpwnam).and_raise(ArgumentError)
       end
 
-      it { is_expected.to be_nil }
+      it { is_expected.to eql '/var/lib/jenkins' }
     end
 
     context 'when a jenkins user does exist' do
       let(:home) { '/rspec/jenkins' }
 
       before do
-        File.should_receive(:expand_path).and_return(home)
+        passwd = Etc::Passwd.new('jenkins', '*', 995, 995, '', home, '/sbin/nologin')
+        Etc.should_receive(:getpwnam).and_return(passwd)
       end
 
       it { is_expected.to eql home }
