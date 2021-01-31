@@ -23,7 +23,7 @@ class jenkins::cli {
   }
 
   $jar = "${jenkins::libdir}/jenkins-cli.jar"
-  $extract_jar = "/bin/wget -O ${jar} http://127.0.0.1:8080/jnlpJars/jenkins-cli.jar"
+  $download_jar = "wget -O ${jar} http://localhost:8080/jnlpJars/jenkins-cli.jar"
 
   # make sure we always call Exec[jenlins-cli] in case
   # the binary does not exist
@@ -32,7 +32,7 @@ class jenkins::cli {
     creates => $jar,
   }
   ~> exec { 'jenkins-cli' :
-    command     => "sleep 30 && ${extract_jar}",
+    command     => "sleep 30 && ${download_jar}",
     path        => ['/bin', '/usr/bin'],
     cwd         => '/tmp',
     refreshonly => true,
