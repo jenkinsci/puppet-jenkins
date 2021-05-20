@@ -75,4 +75,4 @@ if [ "$JENKINS_ENABLE_ACCESS_LOG" = "yes" ]; then
   PARAMS+=("--simpleAccessLogger.file=/var/log/jenkins/access_log")
 fi
 
-$JAVA_CMD "${PARAMS[@]}"
+eval "$JAVA_CMD ${PARAMS[@]}"
