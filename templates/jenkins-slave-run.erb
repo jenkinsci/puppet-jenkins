@@ -14,7 +14,7 @@ fail() {
 SLAVE_ARGS=()
 
 [[ -n "$JAVA_ARGS" ]] &&
-  SLAVE_ARGS+=("$JAVA_ARGS")
+  SLAVE_ARGS+=($JAVA_ARGS)
 
 SLAVE_ARGS+=(-jar "$JENKINS_SLAVE_JAR")
 
