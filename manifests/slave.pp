@@ -159,7 +159,7 @@ class jenkins::slave (
 
   if $labels {
     if $labels =~ Array {
-      $_combined_labels = hiera_array('jenkins::slave::labels', $labels)
+      $_combined_labels = lookup('jenkins::slave::labels', Array[String], 'unique', $labels)
       $_real_labels = join($_combined_labels, ' ')
     }
     else {
@@ -169,7 +169,7 @@ class jenkins::slave (
 
   if $java_args {
     if $java_args =~ Array {
-      $_combined_java_args = hiera_array('jenkins::slave::java_args', $java_args)
+      $_combined_java_args = lookup('jenkins::slave::java_args', Array[String], 'unique', $java_args)
       $_real_java_args = join($_combined_java_args, ' ')
     }
     else {
@@ -179,7 +179,7 @@ class jenkins::slave (
 
   if $swarm_client_args {
     if $swarm_client_args =~ Array {
-      $_combined_swarm_client_args = hiera_array('jenkins::slave::swarm_client_args', $swarm_client_args)
+      $_combined_swarm_client_args = lookup('jenkins::slave::swarm_client_args', Array[String], 'unique', $swarm_client_args)
       $_real_swarm_client_args = join($_combined_swarm_client_args, ' ')
     }
     else {
