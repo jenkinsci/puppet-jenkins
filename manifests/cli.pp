@@ -23,11 +23,7 @@ class jenkins::cli {
   }
 
   $jar = "${jenkins::libdir}/jenkins-cli.jar"
-  $extract_jar = "jar -xf ${jenkins::libdir}/jenkins.war WEB-INF/lib/"
-  $move_jar = "mv WEB-INF/lib/cli-*.jar ${jar}"
-  $remove_dir = 'rm -rf WEB-INF'
-  $cli_tries = $jenkins::cli_tries
-  $cli_try_sleep = $jenkins::cli_try_sleep
+  $download_jar = "wget -O ${jar} http://localhost:8080/jnlpJars/jenkins-cli.jar"
 
   # make sure we always call Exec[jenlins-cli] in case
   # the binary does not exist
@@ -36,7 +32,7 @@ class jenkins::cli {
     creates => $jar,
   }
   ~> exec { 'jenkins-cli' :
-    command     => "${extract_jar} && ${move_jar} && ${remove_dir}",
+    command     => "sleep 30 && ${download_jar}",
     path        => ['/bin', '/usr/bin'],
     cwd         => '/tmp',
     refreshonly => true,
