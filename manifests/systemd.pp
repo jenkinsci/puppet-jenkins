@@ -20,10 +20,13 @@ define jenkins::systemd (
     content => template("${module_name}/${service}-run.erb"),
     owner   => $user,
     mode    => '0700',
-    notify  => Service[$service],
   }
 
-  transition { "stop ${service} service":
+  -> systemd::unit_file { "${service}.service":
+    content => template("${module_name}/${service}.service.erb"),
+  }
+
+  -> transition { "stop ${service} service":
     resource   => Service[$service],
     attributes => {
       # lint:ignore:ensure_first_param
@@ -46,9 +49,4 @@ define jenkins::systemd (
     selinux_ignore_defaults => true,
   }
 
-  systemd::unit_file { "${service}.service":
-    content => template("${module_name}/${service}.service.erb"),
-    notify  => Service[$service],
-    require => File[$sysv_init],
-  }
 }
