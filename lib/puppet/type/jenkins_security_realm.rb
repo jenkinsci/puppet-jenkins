@@ -12,6 +12,30 @@ Puppet::X::Jenkins::Type::Cli.newtype(:jenkins_security_realm) do
 
   newproperty(:arguments, array_matching: :all) do
     desc 'List of arguments to security realm class constructor'
+
+    def insync?(is)
+      is_insync = true
+      reason = ''
+
+      is.each.with_index do |val, index|
+        item_is_not_insync = false
+        if val == :undef
+          item_is_not_insync = true if should[index].class != NilClass
+          reason = 'undef/nil'
+        elsif should[index].class == String && should[index].start_with?('Boolean:')
+          item_is_not_insync = true if should[index].gsub(%r{Boolean:}, '') != val.to_s
+          reason = 'Boolean'
+        elsif val != should[index]
+          item_is_not_insync = true
+          reason = 'N-EQ'
+        end
+
+        debug("Type jenkins_security_realm. Arguments NOT insync? Index: #{index} - is: '#{val}' - should: '#{should[index]}' - reason: #{reason}") if item_is_not_insync
+        is_insync = false if item_is_not_insync
+      end
+
+      is_insync
+    end
   end
 
   # require all instances of jenkins_user, as does

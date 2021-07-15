@@ -143,8 +143,17 @@ class Util {
       }
     } else {
       // XXX explicit type declaration is required here
+      // def Class[] signature = args.collect {
+      //   it instanceof Boolean ? boolean.class : it.class
+      // }
       def Class[] signature = args.collect {
-        it instanceof Boolean ? boolean.class : it.class
+        if ( ( it instanceof String ) && ( it.startsWith('Boolean:') ) ) {
+          Boolean.class
+        } else if ( it instanceof Boolean ) {
+          boolean.class
+        } else {
+          it.class
+        }
       }
 
       ctor = c.getDeclaredConstructor(signature)
@@ -157,6 +166,15 @@ class Util {
       case hudson.security.AuthorizationStrategy$Unsecured:
         ctor.setAccessible(true);
         break
+    }
+
+    args = args.collect {
+      if ( ( it instanceof String ) && ( it.startsWith('Boolean:') ) ) {
+        Boolean boolean_object = new Boolean(it.replace('Boolean:','')); 
+        boolean_object
+      } else {
+        it
+      }
     }
 
     ctor.newInstance(*args)
@@ -823,6 +841,38 @@ class Actions {
         ]
         break
 
+      //  Open ID
+      case 'org.jenkinsci.plugins.oic.OicSecurityRealm':
+        config = [
+          setSecurityRealm: [
+            (className): [
+              realm.getClientId(),
+              realm.getClientSecret().plainText,
+              realm.getWellKnownOpenIDConfigurationUrl(),
+              realm.getTokenServerUrl(),
+              realm.getAuthorizationServerUrl(),
+              realm.getUserInfoServerUrl(),
+              realm.getUserNameField(),
+              realm.getTokenFieldToCheckKey(),
+              realm.getTokenFieldToCheckValue(),
+              realm.getFullNameFieldName(),
+              realm.getEmailFieldName(),
+              realm.getScopes(),
+              realm.getGroupsFieldName(),
+              realm.isDisableSslVerification(),
+              realm.isLogoutFromOpenidProvider(),
+              realm.getEndSessionEndpoint(),
+              realm.getPostLogoutRedirectUrl(),
+              realm.isEscapeHatchEnabled(),
+              realm.getEscapeHatchUsername(),
+              realm.getEscapeHatchSecret().plainText,
+              realm.getEscapeHatchGroup(),
+              realm.getAutomanualconfigure()
+            ],
+          ],
+        ]
+        break
+
       // constructor with no arguments
       // "Delegate to servlet container"
       case 'hudson.security.LegacySecurityRealm':
@@ -830,8 +880,8 @@ class Actions {
         config = [
           setSecurityRealm: [
             (realm.getClass().getName()): [],
-         ],
-       ]
+        ],
+      ]
     }
 
     def builder = new groovy.json.JsonBuilder(config)
